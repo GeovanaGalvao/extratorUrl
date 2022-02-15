@@ -1,11 +1,27 @@
+import re
+
+
 class ExtratorURL:
     def __init__(self, url):
+        self.valida_url(url)
         self.url = url.strip()
-        self.valida_url()
 
-    def valida_url(self):
-        if self.url == "":
-            raise ValueError("A URL está vazia")
+    def __len__(self):
+        return len(self.url)
+
+    def __str__(self):
+        return self.get_url_base() + "\nMoeda Origem: " + self.get_moeda_origem() + "\nMoeda Destino: "\
+               + self.get_moeda_destino() + "\nQuantidade: " + self.get_quantidade()
+
+    def __eq__(self, other):
+        return self.url.__eq__(other.url)
+
+    @staticmethod
+    def valida_url(url):
+        if type(url) != str or not url:
+            raise ValueError("A URL é inválida")
+        elif not re.compile('(http(s)?://)?(www.)?bytebank.com.br/cambio').match(url):  # valida a URL
+            raise ValueError("A URL é inválida")
 
     def get_url_base(self):
         return self.url[:self.url.find('?')]
@@ -22,3 +38,12 @@ class ExtratorURL:
         '''Retorna a posição final do valor de interesse. Se o indice_e_comercial = -1, signfica que não existe mais
         separador & depois do valor, então será atribuido o valor até o final da string. Caso o resultado seja maior
         que -1, significa que o indice do valor a ser atribuido termina no próximo &.'''
+
+    def get_moeda_origem(self):
+        return self.get_valor_parametro("moedaorigem")
+
+    def get_moeda_destino(self):
+        return self.get_valor_parametro("moedadestino")
+
+    def get_quantidade(self):
+        return self.get_valor_parametro("quantidade")
